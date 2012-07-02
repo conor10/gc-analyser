@@ -15,6 +15,9 @@ from parsegc import ParseGCLog
 class MainPage(webapp2.RequestHandler):
 
     def get(self):
+
+        template_values = { }
+
         template = jinja_environment.get_template('index.html')
         self.response.out.write(template.render(template_values))
         
@@ -39,6 +42,8 @@ class AnalyseLog(webapp2.RequestHandler):
 class DisplayResults(webapp2.RequestHandler):
 
     def get(self):
+        template_values = { }
+
         template = jinja_environment.get_template('results.html')
         self.response.out.write(template.render(template_values))
         
