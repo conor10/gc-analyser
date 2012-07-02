@@ -1,0 +1,42 @@
+<html>
+  <head>
+    <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
+  </head>
+  <body>
+    Results:
+    <table>
+      <tr>
+        <th>Timestamp</th>
+        <th>GC Timestamp</th>
+        <th>YG Util Pre</th>
+        <th>YG Util Post</th>
+        <th>YG Size Post</th>
+        <th>YG Duration</th>
+        <th>Heap Util Pre</th>
+        <th>Heap Util Post</th>
+        <th>Heap Size Post</th>
+        <th>GC Duration</th>
+        <th>User Time</th>
+        <th>Sys Time</th>
+        <th>Real Time</th>
+      <tr>
+      {% for entry in gc_results %}
+        <tr>
+          <td>{{entry.timestamp}}</td>
+          <td>{{entry.gc_timestamp}}</td>
+          <td>{{entry.yg_util_pre}}</td>
+          <td>{{entry.yg_util_post}}</td>
+          <td>{{entry.yg_size_post}}</td>
+          <td>{{entry.yg_pause_time}}</td>
+          <td>{{entry.heap_util_pre}}</td>
+          <td>{{entry.heap_util_post}}</td>
+          <td>{{entry.heap_size_post}}</td>
+          <td>{{entry.pause_time}}</td>
+          <td>{{entry.user_time}}</td>
+          <td>{{entry.sys_time}}</td>
+          <td>{{entry.real_time}}</td>
+        </tr>
+      {% endfor %}
+    </table>
+  </body>
+</html>
