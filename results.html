@@ -18,6 +18,8 @@
         "/serve/{{memory_key}}",
         {
           maxNumberWidth: 20,
+          xlabel: 'Elapsed Time',
+          ylabel: 'Memory Utilisation',
           axes: {
             y: {
               labelsKMG2: true
@@ -30,7 +32,14 @@
         document.getElementById("gc_duration_graph"),
         "/serve/{{gc_duration_key}}",
         {
-          maxNumberWidth: 20
+          maxNumberWidth: 20,
+          xlabel: 'Elapsed Time',
+          ylabel: 'GC Duration (secs)',
+          axes: {
+            y: {
+              digitsAfterDecimal: 10
+            }
+          }
         }
       );
 
@@ -39,6 +48,8 @@
         "/serve/{{gc_reclaimed_key}}",
         {
           maxNumberWidth: 20,
+          xlabel: 'Elapsed Time',
+          ylabel: 'Memory Reclaimed',
           axes: {
             y: {
               labelsKMG2: true

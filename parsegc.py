@@ -128,6 +128,6 @@ class ParNewGCEntry(GCEntry):
         self.user_time = user_time
         self.sys_time = sys_time
         self.real_time = real_time
-        self.yg_reclaimed = str(int(yg_util_pre) - int(yg_util_post))
-        self.heap_reclaimed = str(int(heap_util_pre) - int(heap_util_post))
+        self.yg_reclaimed = str(int(self.yg_util_pre) - int(self.yg_util_post))
+        self.heap_reclaimed = str(int(self.heap_util_pre) - int(self.heap_util_post))
 
