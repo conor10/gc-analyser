@@ -11,12 +11,13 @@ timestamp = re.compile(r"""
     """, re.VERBOSE)
 gcentry = re.compile(r"""
     \s*\[GC\ (\d+\.\d+)?:\ \[[A-Za-z]+:
-    \ (\d+K)->(\d+K)\((\d+K)\),\ (\d+\.\d+)\ secs\]
-    \s*(\d+K)->(\d+K)\((\d+K)\),\ (\d+\.\d+)\ secs\]
+    \ (\d+)K->(\d+)K\((\d+)K\),\ (\d+\.\d+)\ secs\]
+    \s*(\d+)K->(\d+)K\((\d+)K\),\ (\d+\.\d+)\ secs\]
     \s*\[Times:\ user=(\d+\.\d+)\ sys=(\d+\.\d+),?\ real=(\d+\.\d+)\ secs\].*
     """, re.VERBOSE)
 
-class ParseGCLog():        
+
+class ParseGCLog(object):        
 
     def parse_file(self, file):
         gclog = open(file, "r")
@@ -64,7 +65,7 @@ class ParseGCLog():
             return None
 
 
-class GCEntry():
+class GCEntry(object):
 
     def __init__(self,
                 timestamp):
@@ -76,6 +77,27 @@ class GCEntry():
             return self.__dict__ == other.__dict__
         return False
 
+    def get_attr(self):
+        return self.__dict__
+
+    def get_attr_keys(self):
+        return self.__dict__.keys()
+
+    def get_attr_values(self):
+        return self.__dict__.values()
+
+    def get_attr_value(self, key):
+        return self.__dict__[key]
+
+    def get_attr_values(self, dict):
+        for key in dict:
+            if key in self.__dict__:
+                dict[key] = self.__dict__[key]
+        return dict
+
+    # TODO: Check JVM source to confirm 1024 not 1000 should be used
+    def to_bytes(self, value):
+        return str(int(value) << 10)
 
 class ParNewGCEntry(GCEntry):
 
@@ -93,16 +115,19 @@ class ParNewGCEntry(GCEntry):
                 user_time,
                 sys_time,
                 real_time):
-        self.timestamp = timestamp
+        super(ParNewGCEntry, self).__init__(timestamp)
         self.gc_timestamp = gc_timestamp
-        self.yg_util_pre = yg_util_pre
-        self.yg_util_post = yg_util_post
-        self.yg_size_post = yg_size_post
+        self.yg_util_pre = self.to_bytes(yg_util_pre)
+        self.yg_util_post = self.to_bytes(yg_util_post)
+        self.yg_size_post = self.to_bytes(yg_size_post)
         self.yg_pause_time = yg_pause_time
-        self.heap_util_pre = heap_util_pre
-        self.heap_util_post = heap_util_post
-        self.heap_size_post = heap_size_post
+        self.heap_util_pre = self.to_bytes(heap_util_pre)
+        self.heap_util_post = self.to_bytes(heap_util_post)
+        self.heap_size_post = self.to_bytes(heap_size_post)
         self.pause_time = pause_time
         self.user_time = user_time
         self.sys_time = sys_time
         self.real_time = real_time
+        self.yg_reclaimed = str(int(yg_util_pre) - int(yg_util_post))
+        self.heap_reclaimed = str(int(heap_util_pre) - int(heap_util_post))
+

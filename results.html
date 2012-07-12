@@ -1,8 +1,53 @@
 <html>
   <head>
     <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
+    <script type="text/javascript" 
+      src="/static/js/dygraph-combined.js"></script>
   </head>
   <body>
+    <div id="memory_graph"
+  style="width:800px; height:600px;"></div>
+      <div id="gc_duration_graph"
+  style="width:400px; height:300px;"></div>
+      <div id="gc_reclaimed_graph"
+  style="width:400px; height:300px;"></div>
+
+    <script type="text/javascript">
+    g1 = new Dygraph(
+        document.getElementById("memory_graph"),
+        "/serve/{{memory_key}}",
+        {
+          maxNumberWidth: 20,
+          axes: {
+            y: {
+              labelsKMG2: true
+            }
+          }
+        }
+      );
+
+    g2 = new Dygraph(
+        document.getElementById("gc_duration_graph"),
+        "/serve/{{gc_duration_key}}",
+        {
+          maxNumberWidth: 20
+        }
+      );
+
+    g3 = new Dygraph(
+        document.getElementById("gc_reclaimed_graph"),
+        "/serve/{{gc_reclaimed_key}}",
+        {
+          maxNumberWidth: 20,
+          axes: {
+            y: {
+              labelsKMG2: true
+            }
+          }
+        }
+      );
+    </script>
+
     Results:
     <table>
       <tr>
@@ -19,6 +64,8 @@
         <th>User Time</th>
         <th>Sys Time</th>
         <th>Real Time</th>
+        <th>YG Reclaimed</th>
+        <th>Heap Reclaimed</th>
       <tr>
       {% for entry in gc_results %}
         <tr>
@@ -35,8 +82,12 @@
           <td>{{entry.user_time}}</td>
           <td>{{entry.sys_time}}</td>
           <td>{{entry.real_time}}</td>
+          <td>{{entry.yg_reclaimed}}</td>
+          <td>{{entry.heap_reclaimed}}</td>
         </tr>
       {% endfor %}
     </table>
+
+    <h6>Logged in as {{user}} <a href={{logout}}>[Logout]</a></h6>
   </body>
 </html>

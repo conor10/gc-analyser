@@ -1,4 +1,4 @@
-application: gc-analyser
+application: gcanalyser
 version: 1
 runtime: python27
 api_version: 1
@@ -8,8 +8,16 @@ handlers:
 - url: /stylesheets
   static_dir: stylesheets
 
+- url: /static/js
+  static_dir: static/js
+
+- url: /data
+  static_dir: data
+  login: required
+
 - url: /.*
   script: gc-analyser.app
+  login: required
 
 libraries:
 - name: jinja2
