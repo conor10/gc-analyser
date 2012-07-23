@@ -14,7 +14,7 @@ from google.appengine.ext import db
 from google.appengine.ext import testbed
 
 from csvwriter import BlobResultWriter
-from parsegc import ParseGCLog, ParNewGCEntry
+from parsegc import ParseGCLog
 
 
 class TestbedWithFiles(testbed.Testbed):

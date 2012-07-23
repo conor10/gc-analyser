@@ -24,12 +24,6 @@ class ParseGCLogTest(unittest.TestCase):
         result = self.parser.parse_file(self.path + "gc-sample.log")
         self.assertEqual(len(result), 7)
 
-    def test_generate_csv(self):
-        expected_file = self.path + "expected_gc.csv"
-        result = self.parser.parse_file(self.sample_file)
-        self.csv_writer.generate_gc_csv_file(result, self.result_file)
-        self.assertTrue(filecmp.cmp(self.result_file, expected_file))
-
     def test_generate_memory_csv(self):
         expected_file = self.path + "expected_mem.csv"
         result = self.parser.parse_file(self.sample_file)

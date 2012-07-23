@@ -65,23 +65,6 @@ class CSVResultWriter(object):
 class FileResultWriter(CSVResultWriter):
     """Class for writing GC data in CSV format to a regular file
     """
-    def generate_gc_csv_file(self, gcdata, filename):
-        """Generates csv file of GC data
-
-        Csv module is used as it contains dictionary checking to ensure that
-        fields will be written out in the same order as the header with each 
-        new row
-        """
-        attr = gcdata[0].get_attr_keys()
-        file = open(filename, 'wb')
-        csv_writer = csv.DictWriter(file, lineterminator='\n', fieldnames=attr)
-        
-        csv_writer.writeheader()
-        for entry in gcdata:
-            csv_writer.writerow(entry.get_attr())
-
-        file.close()
-
     def generate_csv(self, gcdata, time_series, custom_attr, filename):
         file = open(filename, 'wb')
 
