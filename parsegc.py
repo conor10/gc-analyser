@@ -28,10 +28,12 @@ yg_gc_entry = re.compile(r"""
     """, re.VERBOSE)
 
 full_gc_entry = re.compile(r"""
-    \s*\[Full\ GC\ (?P<gc_ts>\d+\.\d+):\ \[(?P<collector>[A-Za-z]+):
-    \ (?P<tenured_pre>\d+)K->(?P<tenured_post>\d+)K\((?P<tenured_sz>\d+)K\),\ (?P<tenured_pause>\d+\.\d+)\ secs\]
-    \s*(?P<heap_pre>\d+)K->(?P<heap_post>\d+)K\((?P<heap_sz>\d+)K\),
-    \ \[([A-Za-z]+\ )?Perm\ :\ (?P<perm_pre>\d+)K->(?P<perm_post>\d+)K\((?P<perm_sz>\d+)K\)\],\ (?P<perm_pause>\d+\.\d+)\ secs\]
+    \s*\[Full\ GC\ (?:\((?P<system>System)\)\ )?(?:(?P<gc_ts>\d+\.\d+):\ )?
+    (?:\[(?P<yg_collector>[A-Za-z]+):\ (?P<yg_pre>\d+)K->(?P<yg_post>\d+)K\((?P<yg_sz>\d+)K\)\]\ )?
+    \[(?P<collector>[A-Za-z]+):
+    \ (?P<tenured_pre>\d+)K->(?P<tenured_post>\d+)K\((?P<tenured_sz>\d+)K\)(?:,\ (?P<tenured_pause>\d+\.\d+)\ secs)?\]
+    \s*(?P<heap_pre>\d+)K->(?P<heap_post>\d+)K\((?P<heap_sz>\d+)K\),?
+    \ \[([A-Za-z]+\ )?[A-Za-z]+\ ?:\ (?P<perm_pre>\d+)K->(?P<perm_post>\d+)K\((?P<perm_sz>\d+)K\)\],\ (?P<perm_pause>\d+\.\d+)\ secs\]
     \s*\[Times:\ user=(?P<user>\d+\.\d+)\ sys=(?P<sys>\d+\.\d+),?\ real=(?P<real>\d+\.\d+)\ secs\].*
     """, re.VERBOSE)
 
@@ -123,7 +125,8 @@ class ParseGCLog(object):
                     full_gc.group('perm_pause'),
                     full_gc.group('user'),
                     full_gc.group('sys'),
-                    full_gc.group('real'))
+                    full_gc.group('real'),
+                    full_gc.group('system'))
 
                 return result
 
@@ -230,7 +233,8 @@ class FullGCEntry(GCEntry):
                 perm_pause_time, 
                 user_time,
                 sys_time,
-                real_time):
+                real_time,
+                system=False):
         super(FullGCEntry, self).__init__(collector, timestamp)
         self.gc_timestamp = gc_timestamp
         self.tenured_util_pre = self.to_bytes(tenured_util_pre)
@@ -247,6 +251,8 @@ class FullGCEntry(GCEntry):
         self.user_time = user_time
         self.sys_time = sys_time
         self.real_time = real_time
+        if system:
+            system = True
         self.tenured_reclaimed = str(int(self.tenured_util_pre) - int(self.tenured_util_post))
         self.heap_reclaimed = str(int(self.heap_util_pre) - int(self.heap_util_post))
         self.perm_reclaimed = str(int(self.perm_util_pre) - int(self.perm_util_post))

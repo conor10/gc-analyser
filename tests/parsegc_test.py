@@ -2,11 +2,10 @@ import unittest
 
 from parsegc import ParseGCLog, YoungGenGCEntry, FullGCEntry
 # TODO
-# 1. Full GC support
-# 2. Mangled old MSC entries (see TODOs below)
-# 3. Failure schenarios
-# 4. CMS stage parsing
-# 5. G1 log parsing
+# 1. Mangled old MSC entries (see TODOs below)
+# 2. CMS failure schenarios
+# 3. CMS stage parsing
+# 4. G1 log parsing
 
 
 # Serial - young Copy, old MarkSweepCompact
@@ -14,18 +13,21 @@ SERIAL_YG1 = "1.321: [GC 1.321: [DefNew: 80256K->9984K(90240K), 0.2542700 secs] 
 # TODO Test
 SERIAL_YG2 = "1.638: [GC 1.638: [DefNew: 90240K->9984K(90240K), 0.2338166 secs]1.872: [Tenured: 270741K->270823K(270824K), 0.6977344 secs] 280726K->280725K(361064K), [Perm : 4575K->4575K(21248K)], 0.9328023 secs] [Times: user=0.88 sys=0.04, real=0.93 secs] "
 SERIAL_FULL = "26.256: [Full GC 26.256: [Tenured: 349568K->349568K(349568K), 1.3431030 secs] 506815K->506815K(506816K), [Perm : 4607K->4607K(21248K)], 1.3431456 secs] [Times: user=1.31 sys=0.03, real=1.34 secs] "
+SERIAL_SYSTEM = "11.576: [Full GC (System) 11.576: [Tenured: 0K->336K(43712K), 0.0123789 secs] 1747K->336K(63360K), [Perm : 4612K->4612K(21248K)], 0.0132219 secs] [Times: user=0.01 sys=0.00, real=0.01 secs] "
 
 # Young ParNew, old MarkSweepCompact
 # TODO Test
 PARNEW_MSC_YG1 = "0.799: [GC 0.799: [ParNew: 17472K->2176K(19648K), 0.0545699 secs]0.853: [Tenured: 53682K->53696K(53696K), 0.1359657 secs] 56534K->55849K(73344K), [Perm : 4572K->4572K(21248K)], 0.1912721 secs] [Times: user=0.25 sys=0.02, real=0.19 secs] "
 PARNEW_MSC_YG2 = "1.025: [GC 1.025: [ParNew: 35840K->4480K(40320K), 0.0930836 secs] 89536K->88976K(129816K), 0.0931276 secs] [Times: user=0.25 sys=0.03, real=0.10 secs] "
 PARNEW_MSC_FULL = "32.438: [Full GC 32.438: [Tenured: 349567K->349567K(349568K), 1.6792855 secs] 506815K->506815K(506816K), [Perm : 4574K->4574K(21248K)], 1.6793288 secs] [Times: user=1.62 sys=0.05, real=1.68 secs] "
+PARNEW_MSC_SYSTEM = "11.033: [Full GC (System) 11.033: [Tenured: 0K->336K(43712K), 0.0099557 secs] 1747K->336K(63360K), [Perm : 4612K->4612K(21248K)], 0.0108454 secs] [Times: user=0.00 sys=0.00, real=0.01 secs]"
 
 # Young ParNew, old ConcurrentMarkSweep
 PARNEW_CMS_YG1 = "2.225: [GC 2.225: [ParNew: 19134K->2110K(19136K), 0.0619736 secs] 395443K->395442K(412864K), 0.0620169 secs] [Times: user=0.21 sys=0.01, real=0.06 secs] "
 PARNEW_CMS_FULL_FAIL = ("8.622: [Full GC 8.622: [CMS9.380: [CMS-concurrent-mark: 0.898/0.898 secs] [Times: user=1.01 sys=0.02, real=0.89 secs] "
                         "\n(concurrent mode failure): 458751K->458751K(458752K), 4.1504959 secs] 517759K->516889K(517760K), [CMS Perm : 4619K->4619K(21248K)], 4.2218320 secs] [Times: user=3.17 sys=0.12, real=4.22 secs] ")
 PARNEW_CMS_FULL = "12.850: [Full GC 12.850: [CMS: 458751K->458751K(458752K), 2.2371750 secs] 517759K->517722K(517760K), [CMS Perm : 4619K->4609K(21248K)], 2.2372395 secs] [Times: user=2.17 sys=0.05, real=2.23 secs] "
+PARNEW_CMS_SYSTEM = "10.160: [Full GC (System) 10.479: [CMS: 0K->340K(63872K), 0.0206751 secs] 1735K->340K(83008K), [CMS Perm : 4614K->4612K(21248K)], 0.0207745 secs] [Times: user=0.02 sys=0.00, real=0.34 secs] "
 # TODO: Add other stages of CMS
 
 # Young Copy, old ConcurrentMarkSweep
@@ -33,15 +35,18 @@ COPY_CMS_YG1 = "1.438: [GC 1.438: [DefNew: 19136K->2111K(19136K), 0.1023744 secs
 COPY_CMS_FULL_FAIL = ("11.518: [Full GC 11.518: [CMS12.374: [CMS-concurrent-mark: 0.856/0.856 secs] [Times: user=0.85 sys=0.00, real=0.85 secs] "
                         "\n(concurrent mode failure): 503040K->503040K(503040K), 3.2780906 secs] 522175K->522138K(522176K), [CMS Perm : 4619K->4609K(21248K)], 3.2781452 secs] [Times: user=3.21 sys=0.06, real=3.28 secs] ")
 COPY_CMS_FULL = "6.497: [Full GC 6.497: [CMS: 503039K->503040K(503040K), 4.9805391 secs] 522175K->522156K(522176K), [CMS Perm : 4619K->4619K(21248K)], 4.9934847 secs] [Times: user=2.45 sys=0.21, real=4.99 secs] "
+COPY_CMS_SYSTEM = "10.377: [Full GC (System) 10.377: [CMS: 0K->340K(63872K), 0.0161677 secs] 1735K->340K(83008K), [CMS Perm : 4614K->4612K(21248K)], 0.0162435 secs] [Times: user=0.02 sys=0.00, real=0.02 secs] "
 # TODO: Add other stages of CMS
 
 # Young Parallel Scavange, old Parallell Scavange MarkSweep, with adaptive sizing
 PARALLEL_MARKSWEEP_ADAPTIVE_YG1 = "4.607: [GC [PSYoungGen: 83708K->58240K(116480K)] 351227K->351398K(466048K), 0.2748461 secs] [Times: user=0.93 sys=0.04, real=0.27 secs] "
 PARALLEL_MARKSWEEP_ADAPTIVE_FULL = "5.257: [Full GC [PSYoungGen: 116480K->58237K(116480K)] [ParOldGen: 349566K->349567K(349568K)] 466046K->407805K(466048K) [PSPermGen: 4574K->4574K(21248K)], 1.8929788 secs] [Times: user=6.03 sys=0.17, real=1.89 secs] "
+PARALLEL_MARKSWEEP_ADAPTIVE_SYSTEM = "10.295: [Full GC (System) [PSYoungGen: 448K->0K(19136K)] [ParOldGen: 0K->336K(43712K)] 448K->336K(62848K) [PSPermGen: 4612K->4611K(21248K)], 0.0106136 secs] [Times: user=0.02 sys=0.00, real=0.02 secs] "
 
 # Young Parallel Scavange, old Parallell Scavange MarkSweep, without adaptive sizing
 PARALLEL_MARKSWEEP_NON_ADAPTIVE_YG1 = "0.285: [GC [PSYoungGen: 16448K->2688K(19136K)] 55510K->54822K(71296K), 0.0370065 secs] [Times: user=0.13 sys=0.01, real=0.03 secs] "
 PARALLEL_MARKSWEEP_NON_ADAPTIVE_FULL = "0.322: [Full GC [PSYoungGen: 2688K->2581K(19136K)] [ParOldGen: 52134K->52156K(52160K)] 54822K->54738K(71296K) [PSPermGen: 4572K->4570K(21248K)], 0.1916334 secs] [Times: user=0.54 sys=0.02, real=0.20 secs] "
+PARALLEL_MARKSWEEP_NON_ADAPTIVE_SYSTEM = "10.207: [Full GC (System) [PSYoungGen: 448K->0K(19136K)] [ParOldGen: 0K->336K(43712K)] 448K->336K(62848K) [PSPermGen: 4612K->4611K(21248K)], 0.0090976 secs] [Times: user=0.01 sys=0.00, real=0.01 secs] "
 
 
 # Original test entries
@@ -134,6 +139,28 @@ class ParseGCTest(unittest.TestCase):
             "1.34")
         self.assertEqual(full_result, full_expected)
 
+        system_result = self.parser.parse(SERIAL_SYSTEM)
+        system_expected = FullGCEntry(
+            "11.576",
+            "11.576",
+            "Tenured",
+            "0",
+            "336",
+            "43712",
+            "0.0123789",
+            "1747",
+            "336",
+            "63360",
+            "4612",
+            "4612",
+            "21248",
+            "0.0132219",
+            "0.01",
+            "0.00",
+            "0.01",
+            "System")
+        self.assertEqual(system_result, system_expected)
+
 
     def test_young_ps_old_ps_parse(self):
         """Multi-threaded YG collector with throughput collector
@@ -203,6 +230,28 @@ class ParseGCTest(unittest.TestCase):
            "1.68")
         self.assertEqual(full_result, full_expected)
 
+        system_result = self.parser.parse(PARNEW_MSC_SYSTEM)
+        system_expected = FullGCEntry(
+            "11.033",
+            "11.033",
+            "Tenured",
+            "0",
+            "336",
+            "43712",
+            "0.0099557",
+            "1747",
+            "336",
+            "63360",
+            "4612",
+            "4612",
+            "21248",
+            "0.0108454",
+            "0.00",
+            "0.00",
+            "0.01",
+            "System")
+        self.assertEqual(system_result, system_expected)
+
 
     def test_yg_parnew_old_cms_parse(self):
         """Multi-threaded YG collector with concurrent old generation 
@@ -248,25 +297,46 @@ class ParseGCTest(unittest.TestCase):
 
         full_result = self.parser.parse(PARNEW_CMS_FULL)
         full_expected = FullGCEntry(
-        "12.850",
-        "12.850",
-        "CMS",
-        "458751",
-        "458751",
-        "458752",
-        "2.2371750",
-        "517759",
-        "517722",
-        "517760",
-        "4619",
-        "4609",
-        "21248",
-        "2.2372395",
-        "2.17",
-        "0.05",
-        "2.23")
+            "12.850",
+            "12.850",
+            "CMS",
+            "458751",
+            "458751",
+            "458752",
+            "2.2371750",
+            "517759",
+            "517722",
+            "517760",
+            "4619",
+            "4609",
+            "21248",
+            "2.2372395",
+            "2.17",
+            "0.05",
+            "2.23")
         self.assertEqual(full_result, full_expected)
         
+        system_result = self.parser.parse(PARNEW_CMS_SYSTEM)
+        system_expected = FullGCEntry(
+            "10.160",
+            "10.479",
+            "CMS",
+            "0",
+            "340",
+            "63872",
+            "0.0206751",
+            "1735",
+            "340",
+            "83008",
+            "4614",
+            "4612",
+            "21248",
+            "0.0207745",
+            "0.02",
+            "0.00",
+            "0.34",
+            "System")
+        self.assertEqual(system_result, system_expected)
 
 
     def test_yg_copy_old_cms(self):
@@ -313,14 +383,36 @@ class ParseGCTest(unittest.TestCase):
             "4.99")
         self.assertEqual(full_result, full_expected)
 
+        system_result = self.parser.parse(COPY_CMS_SYSTEM)
+        system_expected = FullGCEntry(
+            "10.377",
+            "10.377",
+            "CMS",
+            "0",
+            "340",
+            "63872",
+            "0.0161677",
+            "1735",
+            "340",
+            "83008",
+            "4614",
+            "4612",
+            "21248",
+            "0.0162435",
+            "0.02",
+            "0.00",
+            "0.02",
+            "System")
+        self.assertEqual(system_result, system_expected)
+
 
     def test_young_ps_old_ps(self):
         """Young ParallelScavenge with old ParallelScavenge MarkSweep
 
         -XX:+UseParallelGC -XX:+UseParallelOldGC, turn adaptive sizeing on/off with -XX:+UseAdaptiveSizePolicy
         """
-        result = self.parser.parse(PARALLEL_MARKSWEEP_ADAPTIVE_YG1)
-        expected = YoungGenGCEntry(
+        yg_result = self.parser.parse(PARALLEL_MARKSWEEP_ADAPTIVE_YG1)
+        yg_expected = YoungGenGCEntry(
             "4.607",
             None,
             "PSYoungGen",
@@ -335,10 +427,10 @@ class ParseGCTest(unittest.TestCase):
             "0.93",
             "0.04",
             "0.27")
-        self.assertEqual(result, expected)
+        self.assertEqual(yg_result, yg_expected)
 
-        result2 = self.parser.parse(PARALLEL_MARKSWEEP_NON_ADAPTIVE_YG1)
-        expected2 = YoungGenGCEntry(
+        yg_result2 = self.parser.parse(PARALLEL_MARKSWEEP_NON_ADAPTIVE_YG1)
+        yg_expected2 = YoungGenGCEntry(
             "0.285",
             None,
             "PSYoungGen",
@@ -353,12 +445,97 @@ class ParseGCTest(unittest.TestCase):
             "0.13",
             "0.01",
             "0.03")
-        self.assertEqual(result2, expected2)
+        self.assertEqual(yg_result2, yg_expected2)
 
-        # TODO
-        #PARALLEL_MARKSWEEP_ADAPTIVE_FULL
-        #PARALLEL_MARKSWEEP_NON_ADAPTIVE_FULL
+        full_result = self.parser.parse(PARALLEL_MARKSWEEP_ADAPTIVE_FULL)
+        full_expected = FullGCEntry(
+            "5.257",
+            None,
+            "ParOldGen",
+            "349566",
+            "349567",
+            "349568",
+            None,
+            "466046",
+            "407805",
+            "466048",
+            "4574",
+            "4574",
+            "21248",
+            "1.8929788",
+            "6.03",
+            "0.17",
+            "1.89")
+            #[PSYoungGen: 116480K->58237K(116480K)] 
+        self.assertEqual(full_result, full_expected)
 
+        full_result2 = self.parser.parse(PARALLEL_MARKSWEEP_NON_ADAPTIVE_FULL)
+        full_expected2 = FullGCEntry(
+            "0.322",
+            None,
+            "ParOldGen",
+            "52134",
+            "52156",
+            "52160",
+            None,
+            "54822",
+            "54738",
+            "71296",
+            "4572",
+            "4570",
+            "21248",
+            "0.1916334",
+            "0.54",
+            "0.02",
+            "0.20")
+            #[PSYoungGen: 2688K->2581K(19136K)]
+        self.assertEqual(full_result2, full_expected2)
+
+        system_result = self.parser.parse(PARALLEL_MARKSWEEP_ADAPTIVE_SYSTEM)
+        system_expected = FullGCEntry(
+            "10.295",
+            None,
+            "ParOldGen",
+            "0",
+            "336",
+            "43712",
+            None,
+            "448",
+            "336",
+            "62848",
+            "4612",
+            "4611",
+            "21248",
+            "0.0106136",
+            "0.02",
+            "0.00",
+            "0.02",
+            "System")
+            #[PSYoungGen: 448K->0K(19136K)]
+        self.assertEqual(system_result, system_expected)
+
+        system_result2 = self.parser.parse(PARALLEL_MARKSWEEP_NON_ADAPTIVE_SYSTEM)
+        system_expected2 = FullGCEntry(
+            "10.207",
+            None,
+            "ParOldGen",
+            "0",
+            "336",
+            "43712",
+            None,
+            "448",
+            "336",
+            "62848",
+            "4612",
+            "4611",
+            "21248",
+            "0.0090976",
+            "0.01",
+            "0.00",
+            "0.01",
+            "System")
+            #[PSYoungGen: 448K->0K(19136K)]
+        self.assertEqual(system_result2, system_expected2)
 
     def test_invalid_entry(self):
         result = self.parser.parse(CMS_INITIAL_MARK)
