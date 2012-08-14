@@ -52,6 +52,7 @@ cms_remark = re.compile(r"""
     """, re.VERBOSE)
 
 
+# TODO Remove ParseGCLog class wrapper around these functions?
 class ParseGCLog(object):        
 
     def parse_file(self, file):
@@ -152,7 +153,7 @@ class GCEntry(object):
                 collector,
                 timestamp):
         self.collector = collector
-        self.timestamp = timestamp
+        self.timestamp = float(timestamp)
 
     def __eq__(self, 
                 other):
@@ -180,7 +181,7 @@ class GCEntry(object):
 
     # TODO: Check JVM source to confirm 1024 not 1000 should be used
     def to_bytes(self, value):
-        return str(int(value) << 10)
+        return value << 10
 
 class YoungGenGCEntry(GCEntry):
 
@@ -200,20 +201,20 @@ class YoungGenGCEntry(GCEntry):
                 sys_time,
                 real_time):
         super(YoungGenGCEntry, self).__init__(collector, timestamp)
-        self.gc_timestamp = gc_timestamp
-        self.yg_util_pre = self.to_bytes(yg_util_pre)
-        self.yg_util_post = self.to_bytes(yg_util_post)
-        self.yg_size_post = self.to_bytes(yg_size_post)
-        self.yg_pause_time = yg_pause_time
-        self.heap_util_pre = self.to_bytes(heap_util_pre)
-        self.heap_util_post = self.to_bytes(heap_util_post)
-        self.heap_size_post = self.to_bytes(heap_size_post)
-        self.pause_time = pause_time
-        self.user_time = user_time
-        self.sys_time = sys_time
-        self.real_time = real_time
-        self.yg_reclaimed = str(int(self.yg_util_pre) - int(self.yg_util_post))
-        self.heap_reclaimed = str(int(self.heap_util_pre) - int(self.heap_util_post))
+        self.gc_timestamp = float(gc_timestamp or "0")
+        self.yg_util_pre = self.to_bytes(int(yg_util_pre))
+        self.yg_util_post = self.to_bytes(int(yg_util_post))
+        self.yg_size_post = self.to_bytes(int(yg_size_post))
+        self.yg_pause_time = float(yg_pause_time or "0")
+        self.heap_util_pre = self.to_bytes(int(heap_util_pre))
+        self.heap_util_post = self.to_bytes(int(heap_util_post))
+        self.heap_size_post = self.to_bytes(int(heap_size_post))
+        self.pause_time = float(pause_time)
+        self.user_time = float(user_time)
+        self.sys_time = float(sys_time)
+        self.real_time = float(real_time)
+        self.yg_reclaimed = self.yg_util_pre - self.yg_util_post
+        self.heap_reclaimed = self.heap_util_pre - self.heap_util_post
 
 class FullGCEntry(GCEntry):
     def __init__(self,
@@ -234,26 +235,28 @@ class FullGCEntry(GCEntry):
                 user_time,
                 sys_time,
                 real_time,
-                system=False):
+                system=None):
         super(FullGCEntry, self).__init__(collector, timestamp)
-        self.gc_timestamp = gc_timestamp
-        self.tenured_util_pre = self.to_bytes(tenured_util_pre)
-        self.tenured_util_post = self.to_bytes(tenured_util_post)
-        self.tenured_size_post = self.to_bytes(tenured_size_post)
-        self.tenured_pause_time = tenured_pause_time
-        self.heap_util_pre = self.to_bytes(heap_util_pre)
-        self.heap_util_post = self.to_bytes(heap_util_post)
-        self.heap_size_post = self.to_bytes(heap_size_post)
-        self.perm_util_pre = self.to_bytes(perm_util_pre)
-        self.perm_util_post = self.to_bytes(perm_util_post)
-        self.perm_size_post = self.to_bytes(perm_size_post)
-        self.perm_pause_time = perm_pause_time
-        self.user_time = user_time
-        self.sys_time = sys_time
-        self.real_time = real_time
+        self.gc_timestamp = float(gc_timestamp or 0)
+        self.tenured_util_pre = self.to_bytes(int(tenured_util_pre))
+        self.tenured_util_post = self.to_bytes(int(tenured_util_post))
+        self.tenured_size_post = self.to_bytes(int(tenured_size_post))
+        self.tenured_pause_time = float(tenured_pause_time or 0)
+        self.heap_util_pre = self.to_bytes(int(heap_util_pre))
+        self.heap_util_post = self.to_bytes(int(heap_util_post))
+        self.heap_size_post = self.to_bytes(int(heap_size_post))
+        self.perm_util_pre = self.to_bytes(int(perm_util_pre))
+        self.perm_util_post = self.to_bytes(int(perm_util_post))
+        self.perm_size_post = self.to_bytes(int(perm_size_post))
+        self.perm_pause_time = float(perm_pause_time)
+        self.user_time = float(user_time)
+        self.sys_time = float(sys_time)
+        self.real_time = float(real_time)
         if system:
-            system = True
-        self.tenured_reclaimed = str(int(self.tenured_util_pre) - int(self.tenured_util_post))
-        self.heap_reclaimed = str(int(self.heap_util_pre) - int(self.heap_util_post))
-        self.perm_reclaimed = str(int(self.perm_util_pre) - int(self.perm_util_post))
+            self.system = True
+        else:
+            self.system = system
+        self.tenured_reclaimed = self.tenured_util_pre - self.tenured_util_post
+        self.heap_reclaimed = self.heap_util_pre - self.heap_util_post
+        self.perm_reclaimed = self.perm_util_pre - self.perm_util_post
 

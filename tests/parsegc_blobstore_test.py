@@ -4,6 +4,8 @@ import shutil
 import sys
 import unittest
 
+import graph
+
 # Required for unit testing purposes
 sys.path = sys.path + ['/usr/local/google_appengine', '/usr/local/google_appengine/lib/yaml/lib', '/usr/local/google_appengine/google/appengine']
 from google.appengine.ext import blobstore
@@ -14,6 +16,7 @@ from google.appengine.ext import db
 from google.appengine.ext import testbed
 
 from csvwriter import BlobResultWriter
+from datastore_model import LogData
 from parsegc import ParseGCLog
 
 
@@ -72,20 +75,38 @@ class ParseGCBlobTest(unittest.TestCase):
     def test_generate_memory_csv(self):
         expected_data = self._load_file_data(self.path + "expected_mem.csv")
         gc_data = self.parser.parse_file(self.sample_file)
-        blob_key = self.csv_writer.generate_memory_csv(gc_data)
+        log_key = LogData(
+            filename="memory.tmp",
+            notes="notes").put()
+        blob_key = graph.generate_cached_graph(log_key, 
+            graph.YG_GC_MEMORY, 
+            gc_data, 
+            self.csv_writer)
         result_data = self._load_blob_data(blob_key)
         self.assertTrue(result_data, expected_data)
 
     def test_generate_gc_reclaimed_csv(self):
         expected_data = self._load_file_data(self.path + "expected_reclaimed.csv")
         gc_data = self.parser.parse_file(self.sample_file)
-        blob_key = self.csv_writer.generate_gc_reclaimed_csv(gc_data)
+        log_key = LogData(
+            filename="reclaimed.tmp",
+            notes="notes").put()
+        blob_key = graph.generate_cached_graph(log_key, 
+            graph.YG_MEMORY_RECLAIMED, 
+            gc_data, 
+            self.csv_writer)
         result_data = self._load_blob_data(blob_key)
         self.assertTrue(result_data, expected_data)
 
     def test_generate_gc_duration_csv(self):
         expected_data = self._load_file_data(self.path + "expected_duration.csv")
         gc_data = self.parser.parse_file(self.sample_file)
-        blob_key = self.csv_writer.generate_gc_duration_csv(gc_data)
+        log_key = LogData(
+            filename="duration.tmp",
+            notes="notes").put()
+        blob_key = graph.generate_cached_graph(log_key, 
+            graph.YG_GC_DURATION, 
+            gc_data, 
+            self.csv_writer)
         result_data = self._load_blob_data(blob_key)
         self.assertTrue(result_data, expected_data)
