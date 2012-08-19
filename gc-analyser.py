@@ -5,7 +5,8 @@ jinja_environment = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__)))
 
 import cgi
-import datetime 
+import datetime
+import time
 import urllib
 import webapp2
 
@@ -50,6 +51,8 @@ class AnalyseLog(webapp2.RequestHandler):
         if not validate_user(user.email()):
             self.redirect(users.create_login_url(self.request.uri))
 
+        start = time.time()
+
         #file = self.request.body_file
         file = self.request.params["gclog"].file
 
@@ -61,7 +64,7 @@ class AnalyseLog(webapp2.RequestHandler):
         parser = ParseGCLog()
         gc_results = parser.parse_data(file)
 
-        # persist gc data
+        # persist gc data - too slow at present with large datasets
         gc_datastore.store_data(log_key, gc_results)
 
         # persist all CSV data we generate to the store so we 
@@ -82,11 +85,13 @@ class AnalyseLog(webapp2.RequestHandler):
             gc_results, 
             blob_writer)
         
+        duration = time.time() - start
 
         # Pass the key to our results, as the data will be obtained via a 
         template_values = {
             'user': user,
             'logout': users.create_logout_url("/"),
+            'duration': duration,
             'submission_key': log_key,
             'gc_results': gc_results,
             'memory_key': str(memory_blob_key),

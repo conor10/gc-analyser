@@ -1,19 +1,94 @@
+<!DOCTYPE html>
 <html>
   <head>
     <link type="text/css" rel="stylesheet" href="/stylesheets/main.css" />
+    <link href="/stylesheets/bootstrap.css" rel="stylesheet">
+    <style type="text/css">
+      body {
+        padding-top: 60px;
+        padding-bottom: 40px;
+      }
+    </style>
+    <link href="/stylesheets/bootstrap-responsive.css" rel="stylesheet">
   </head>
   <body>
-    Please submit your GC logfile below:
+    <div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="#">GC Analyser</a>
+          <div class="nav-collapse">
+            <ul class="nav">
+              <li class="active"><a href="#">Home</a></li>
+              <li><a href="#about">About</a></li>
+              <li><a href="#contact">Contact</a></li>
+            </ul>
+          </div><!--/.nav-collapse -->
+        </div>
+      </div>
+    </div>
 
-     <form action="/analyse" enctype="multipart/form-data" method="post">
-            <div><label>GC File:</label></div>
-            <div><input type="file" name="gclog"/></div>
-            <div>Configuration Notes <input type="text" name="notes"/></div>
-            <div><input type="submit" value="Submit log" /></div>
-     </form>
+        <div class="container">
 
-     A summary of supported Oracle GC configurations can be viewed on the fasterj site <a href="http://www.fasterj.com/articles/oraclecollectors1.shtml">here</a>
+      <!-- Main hero unit for a primary marketing message or call to action -->
+      <div class="hero-unit">
+        <h1>Garbage Problems?</h1>
+        <p>Here's a place to help you diagnose them, all you need is a garbage collector log, and we'll help you make sense of the data it contains</p>
+        <p><a class="btn btn-primary btn-large">Learn more &raquo;</a></p>
+      </div>
 
-     <h6>Logged in as {{user}} <a href={{logout}}>[Logout]</a></h6>
+      <!-- Example row of columns -->
+      <div class="row">
+        <div class="span4">
+           <h2>Upload</h2>
+           Submit your GC logfile below:
+           <form action="/analyse" enctype="multipart/form-data" method="post">
+                  <!--<div><label>GC File:</label></div>-->
+                  <div><input type="file" name="gclog"/></div>
+                  <div>Configuration Notes (JVM options could be useful here...)<input type="text" name="notes"/></div>
+                  <div><input type="submit" value="Hit me..." /></div>
+           </form>
+
+     
+        </div>
+        <div class="span4">
+          <h2>More info</h2>
+          A summary of supported Oracle GC configurations can be viewed on the fasterj site <a href="http://www.fasterj.com/articles/oraclecollectors1.shtml">here</a>
+       </div>
+        <div class="span4">
+          <h2>Supported configurations</h2>
+          <p>Oracle JVM 1.6</p>
+          <!--<p><a class="btn" href="#">View details &raquo;</a></p>-->
+        </div>
+      </div>
+
+      <hr>
+
+      <footer>
+        <h6>Logged in as {{user}} <a href={{logout}}>[Logout]</a></h6>
+        <p>&copy; Company 2012</p>
+      </footer>
+
+    </div> <!-- /container -->
+
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="/static/js/jquery.js"></script>
+    <script src="/static/js/bootstrap-transition.js"></script>
+    <script src="/static/js/bootstrap-alert.js"></script>
+    <script src="/static/js/bootstrap-modal.js"></script>
+    <script src="/static/js/bootstrap-dropdown.js"></script>
+    <script src="/static/js/bootstrap-scrollspy.js"></script>
+    <script src="/static/js/bootstrap-tab.js"></script>
+    <script src="/static/js/bootstrap-tooltip.js"></script>
+    <script src="/static/js/bootstrap-popover.js"></script>
+    <script src="/static/js/bootstrap-button.js"></script>
+    <script src="/static/js/bootstrap-collapse.js"></script>
+    <script src="/static/js/bootstrap-carousel.js"></script>
+    <script src="/static/js/bootstrap-typeahead.js"></script>
+
   </body>
 </html>

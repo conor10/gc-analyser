@@ -49,8 +49,8 @@ def _yg_memory_reclaimed(log_key, gc_data, blob_writer, filename):
 
     results = []
     for entry in gc_data:
-        if isinstance(entry, YoungGenGCEntry):
-            results.append(Reclaimed(entry))
+        #if isinstance(entry, YoungGenGCEntry):
+        results.append(Reclaimed(entry))
 
     return blob_writer.generate_csv(results, filename)
 
