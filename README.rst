@@ -29,4 +29,4 @@ BSD
 
 Screen captures
 ===============
-.. image:: gc-analyser/blob/master/screencapture.png
+.. image:: https://github.com/conor10/gc-analyser/blob/master/screencapture.png
