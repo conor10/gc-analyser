@@ -213,8 +213,7 @@ class YoungGenGCEntry(GCEntry):
         self.user_time = float(user_time)
         self.sys_time = float(sys_time)
         self.real_time = float(real_time)
-        self.yg_reclaimed = self.yg_util_pre - self.yg_util_post
-        self.heap_reclaimed = self.heap_util_pre - self.heap_util_post
+
 
 class FullGCEntry(GCEntry):
     def __init__(self,
@@ -231,7 +230,7 @@ class FullGCEntry(GCEntry):
                 perm_util_pre,
                 perm_util_post,
                 perm_size_post,
-                perm_pause_time, 
+                pause_time, 
                 user_time,
                 sys_time,
                 real_time,
@@ -248,7 +247,7 @@ class FullGCEntry(GCEntry):
         self.perm_util_pre = self.to_bytes(int(perm_util_pre))
         self.perm_util_post = self.to_bytes(int(perm_util_post))
         self.perm_size_post = self.to_bytes(int(perm_size_post))
-        self.perm_pause_time = float(perm_pause_time)
+        self.pause_time = float(pause_time)
         self.user_time = float(user_time)
         self.sys_time = float(sys_time)
         self.real_time = float(real_time)
@@ -256,7 +255,4 @@ class FullGCEntry(GCEntry):
             self.system = True
         else:
             self.system = system
-        self.tenured_reclaimed = self.tenured_util_pre - self.tenured_util_post
-        self.heap_reclaimed = self.heap_util_pre - self.heap_util_post
-        self.perm_reclaimed = self.perm_util_pre - self.perm_util_post
 

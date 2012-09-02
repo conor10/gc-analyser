@@ -1,0 +1,187 @@
+      {% extends "static/templates/base.html" %}
+      {% block title %}Results{% endblock %}
+      {% block content %}
+      <h3>GC activity summary</h3>
+      <div class="row">
+        <div class="span5">
+          <p>The graph on the right visualises how the memory footprint of your application has grown over time. It displays the size of memory available to your application following each garbage collection event.</p>
+
+          <p>If the tenured size continually grows significantly over the lifetime of your application, chances are full GC events will become more common, and your application may eventually run out of memory.</p>
+
+          <p><b>Summary Stats</b></p>
+
+          <table class="table table-hover table-condensed" style="font-size: 8pt">
+            {% for key, value in summary_stats.items() %}
+              <tr>
+                <td>{{key}}</td>
+                <td>{{value}}</td>
+              </tr>
+            {% endfor %}
+          </table>
+        </div>
+        <div class="span5">
+          <b>Memory Utilisation Post GC (<a href="/serve/{{memory_util_post_key}}" download="mem_util_post.csv">csv</a>)</b>
+          <div id="memory_util_post_graph" 
+            style="width:600px; height:450px;">
+          </div>
+        </div>
+      </div>
+      <div class="row">
+        <div class="span5">
+          <b>YG GC Info (<a href="/serve/{{yg_memory_key}}" download="yg_memory.csv">csv</a>)</b>
+          <div id="yg_memory_graph"
+            style="width:400px; height:300px;">
+          </div>
+          <b>Full GC Info (<a href="/serve/{{full_memory_key}}" download="full_memory.csv">csv</a>)</b>
+          <div id="full_memory_graph"
+            style="width:400px; height:300px;">
+          </div>
+        </div>
+        <div class="span5">
+          <b>GC Pause Times (<a href="/serve/{{gc_duration_key}}" download="duration.csv">csv</a>)</b>
+          <div id="gc_duration_graph"
+            style="width:400px; height:300px;">
+          </div>
+          <b>Memory Reclaimed (<a href="serve/{{gc_reclaimed_key}}" download="reclaimed.csv">csv</a>)</b>
+          <div id="gc_reclaimed_graph"
+            style="width:400px; height:300px;">
+          </div>
+        </div>
+      </div>
+
+      <script type="text/javascript">
+      mem_util_post = new Dygraph(
+          document.getElementById("memory_util_post_graph"),
+          "/serve/{{memory_util_post_key}}",
+          {
+            maxNumberWidth: 20,
+            xlabel: 'Elapsed Time',
+            ylabel: 'Memory Utilisation',
+            axes: {
+              y: {
+                labelsKMG2: true
+              }
+            },
+            connectSeparatedPoints: true
+          }
+        );
+
+      yg_mem = new Dygraph(
+          document.getElementById("yg_memory_graph"),
+          "/serve/{{yg_memory_key}}",
+          {
+            maxNumberWidth: 20,
+            xlabel: 'Elapsed Time',
+            ylabel: 'Memory Utilisation',
+            axes: {
+              y: {
+                labelsKMG2: true
+              }
+            },
+            connectSeparatedPoints: true
+          }
+        );
+
+      full_mem = new Dygraph(
+          document.getElementById("full_memory_graph"),
+          "/serve/{{full_memory_key}}",
+          {
+            maxNumberWidth: 20,
+            xlabel: 'Elapsed Time',
+            ylabel: 'Memory Utilisation',
+            axes: {
+              y: {
+                labelsKMG2: true
+              }
+            },
+            connectSeparatedPoints: true
+          }
+        );
+
+      gc_duration = new Dygraph(
+          document.getElementById("gc_duration_graph"),
+          "/serve/{{gc_duration_key}}",
+          {
+            maxNumberWidth: 20,
+            xlabel: 'Elapsed Time',
+            ylabel: 'GC Duration (secs)',
+            axes: {
+              y: {
+                digitsAfterDecimal: 10
+              }
+            },
+            connectSeparatedPoints: true
+          }
+        );
+
+      gc_reclaimed = new Dygraph(
+          document.getElementById("gc_reclaimed_graph"),
+          "/serve/{{gc_reclaimed_key}}",
+          {
+            maxNumberWidth: 20,
+            xlabel: 'Elapsed Time',
+            ylabel: 'Memory Reclaimed',
+            axes: {
+              y: {
+                labelsKMG2: true
+              }
+            },
+            connectSeparatedPoints: true,
+          }
+        );
+      </script>
+
+      <b>Results (<a href="/serve/{{results_key}}" download="results.csv">csv</a>)</b>
+      <table class="table table-hover table-condensed" style="font-size: 8pt">
+        <tr>
+          <th>Timestamp</th>
+          <th>Collector</th>
+          <th>GC Timestamp</th>
+          <th>YG Util Pre</th>
+          <th>YG Util Post</th>
+          <th>YG Size Post</th>
+          <th>YG Duration</th>
+          <th>Tenured Util Pre</th>
+          <th>Tenured Util Post</th>
+          <th>Tenured Size Post</th>
+          <th>Tenured Duration</th>
+          <th>Perm Util Pre</th>
+          <th>Perm Util Post</th>
+          <th>Perm Size Post</th>
+          <th>Heap Util Pre</th>
+          <th>Heap Util Post</th>
+          <th>Heap Size Post</th>
+          <th>GC Duration</th>
+          <th>User Time</th>
+          <th>Sys Time</th>
+          <th>Real Time</th>
+        <tr>
+        {% for entry in gc_results %}
+          <tr>
+            <td>{{entry.timestamp}}</td>
+            <td>{{entry.collector}}</td>
+            <td>{{entry.gc_timestamp}}</td>
+            <td>{{entry.yg_util_pre}}</td>
+            <td>{{entry.yg_util_post}}</td>
+            <td>{{entry.yg_size_post}}</td>
+            <td>{{entry.yg_pause_time}}</td>
+            <td>{{entry.tenured_util_pre}}</td>
+            <td>{{entry.tenured_util_post}}</td>
+            <td>{{entry.tenured_size_post}}</td>
+            <td>{{entry.tenured_pause_time}}</td>
+            <td>{{entry.perm_util_pre}}</td>
+            <td>{{entry.perm_util_post}}</td>
+            <td>{{entry.perm_size_post}}</td>
+            <td>{{entry.heap_util_pre}}</td>
+            <td>{{entry.heap_util_post}}</td>
+            <td>{{entry.heap_size_post}}</td>
+            <td>{{entry.pause_time}}</td>
+            <td>{{entry.user_time}}</td>
+            <td>{{entry.sys_time}}</td>
+            <td>{{entry.real_time}}</td>
+          </tr>
+        {% endfor %}
+      </table>
+      <p> Processed {{ gc_results|length }} entries in {{duration}} secs
+
+    {% endblock %}

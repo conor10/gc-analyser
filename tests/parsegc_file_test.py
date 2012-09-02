@@ -19,7 +19,6 @@ class ParseGCLogTest(unittest.TestCase):
         self.csv_writer = FileResultWriter()
         
     def tearDown(self):
-        return
         if os.path.isfile(self.result_file):
             os.remove(self.result_file)
 
@@ -42,7 +41,7 @@ class ParseGCLogTest(unittest.TestCase):
         expected_file = self.path + "expected_reclaimed.csv"
         result = self.parser.parse_file(self.sample_file)
         graph.generate_graph(None, 
-            graph.YG_MEMORY_RECLAIMED, 
+            graph.MEMORY_RECLAIMED, 
             result, 
             self.csv_writer, 
             False, 
@@ -53,7 +52,7 @@ class ParseGCLogTest(unittest.TestCase):
         expected_file = self.path + "expected_duration.csv"
         result = self.parser.parse_file(self.sample_file)
         graph.generate_graph(None, 
-            graph.YG_GC_DURATION, 
+            graph.GC_DURATION, 
             result, 
             self.csv_writer, 
             False, 

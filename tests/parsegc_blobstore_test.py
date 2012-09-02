@@ -92,7 +92,7 @@ class ParseGCBlobTest(unittest.TestCase):
             filename="reclaimed.tmp",
             notes="notes").put()
         blob_key = graph.generate_cached_graph(log_key, 
-            graph.YG_MEMORY_RECLAIMED, 
+            graph.MEMORY_RECLAIMED, 
             gc_data, 
             self.csv_writer)
         result_data = self._load_blob_data(blob_key)
@@ -105,7 +105,7 @@ class ParseGCBlobTest(unittest.TestCase):
             filename="duration.tmp",
             notes="notes").put()
         blob_key = graph.generate_cached_graph(log_key, 
-            graph.YG_GC_DURATION, 
+            graph.GC_DURATION, 
             gc_data, 
             self.csv_writer)
         result_data = self._load_blob_data(blob_key)

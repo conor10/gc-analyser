@@ -8,6 +8,15 @@ from google.appengine.ext import blobstore
 from google.appengine.ext import db
 from google.appengine.ext.db import polymodel
 
+class CommentData(db.Model):
+    """Comments submitted by users"""
+    name = db.StringProperty()
+    email = db.StringProperty()
+    timestamp = db.DateTimeProperty(auto_now_add=True)
+    notify = db.BooleanProperty()
+    comments = db.StringProperty(multiline=True)
+    file = db.BlobProperty()
+
 
 class LogData(db.Model):
     """Root entry created for a new file upload"""
@@ -73,7 +82,7 @@ class FullGCModel(GCModel):
     perm_util_pre = db.IntegerProperty()
     perm_util_post = db.IntegerProperty()
     perm_size_post = db.IntegerProperty()
-    perm_pause_time = db.FloatProperty()
+    pause_time = db.FloatProperty()
     user_time = db.FloatProperty()
     sys_time = db.FloatProperty()
     real_time = db.FloatProperty()

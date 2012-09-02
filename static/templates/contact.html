@@ -1,0 +1,26 @@
+      {% extends "static/templates/base.html" %}
+      {% block title %}Contact{% endblock %}
+      {% block content %}
+        <h1>Contact</h1>
+        <p>
+        <p>If you have any suggestions/feedback we'd love to hear from you.</p>
+
+        <p>You can mail us at me@example.com, or submit suggestions, or even a GC logfile via the below form</p>
+
+        <legend></legend>
+        <form action="/submit-contact" enctype="multipart/form-data" method="post">
+          <label>Your name</label>
+          <input type="text" name="name" placeholder="Name" required="required">
+          <label>Email (optional)</label>
+          <input type="text" name="email" placeholder="Email"/>
+          <label>Comments</label>
+          <textarea name="comments" rows="5" required="required"></textarea>
+          <label>
+            <input type="file" name="gclog"/>
+          </label>
+          <label class="checkbox">
+            <input type="checkbox" name="notify" value="Notify">Notify me of site updates
+          </label>
+          <button type="submit" class="btn">Submit</button>
+         </form>
+      {% endblock %}

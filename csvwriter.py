@@ -7,6 +7,9 @@ from google.appengine.api import files
 
 from parsegc import YoungGenGCEntry
 
+
+xstr = lambda s: '' if s is None else str(s)
+
 class CSVResultWriter(object):
     
     """def write_csv_data(self, gcdata, time_series, custom_attr, file, req_type):
@@ -31,53 +34,15 @@ class CSVResultWriter(object):
         """
 
     def write_csv_data(self, result_set, file):
+        """Write csv data indexed by time series"""
         # Write our headers
         file.write(result_set[0].time_series_key + ',' + 
             ','.join(result_set[0].result_attr.keys()) + '\n')
 
-        # Write our data
+        # Write our data - need to ensure None value is not written as "None"
         for entry in result_set:
-            file.write(str(entry.time_series_value) + ',' + 
-                ','.join(map(str, entry.result_attr.values())) + '\n')
-
-
-    def generate_memory_csv(self, gcdata, filename=None):
-
-        mem_attr = {
-            'yg_util_pre': None,
-            'yg_util_post': None,
-            'yg_size_post': None,
-            'heap_util_pre': None,
-            'heap_util_post': None,
-            'heap_size_post': None
-        }
-
-        return self.generate_csv(gcdata, 'timestamp', mem_attr, 
-            filename, YoungGenGCEntry)
-
-    def generate_gc_reclaimed_csv(self, gcdata, filename=None):
-        """Size of data reclaimed in YG & heap following GC
-        """
-
-        size_attr = {
-            'yg_reclaimed': None,
-            'heap_reclaimed': None
-        }
-
-        return self.generate_csv(gcdata, 'timestamp', size_attr, 
-            filename, YoungGenGCEntry)
-
-    def generate_gc_duration_csv(self, gcdata, filename=None):
-        """Duration of GC
-        """
-
-        pause_attr = {
-            'yg_pause_time': None,
-            'pause_time': None
-        }
-
-        return self.generate_csv(gcdata, 'timestamp', pause_attr, 
-            filename, YoungGenGCEntry)
+            file.write(xstr(entry.time_series_value) + ',' + 
+                ','.join(map(xstr, entry.result_attr.values())) + '\n')
 
 
 class FileResultWriter(CSVResultWriter):

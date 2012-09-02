@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link href="/stylesheets/bootstrap.css" rel="stylesheet">
+    <style type="text/css">
+      body {
+        padding-top: 60px;
+        padding-bottom: 40px;
+      }
+    </style>
+    <link href="/stylesheets/bootstrap-responsive.css" rel="stylesheet">
+    <script type="text/javascript" 
+      src="/static/js/dygraph-combined.js"></script>
+    <title>{% block title %}GC Analysis{% endblock %}</title>
+  </head>
+  <body>
+    <div class="navbar navbar-fixed-top">
+      <div class="navbar-inner">
+        <div class="container">
+          <a class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </a>
+          <a class="brand" href="/">GC Analyser</a>
+          <div class="nav-collapse">
+            <ul class="nav">
+              <li{% if name == "/index" %} class="active"{% endif %}><a href="/">Home</a></li>
+              <li{% if name == "/about" %} class="active"{% endif %}><a href="/about">About</a></li>
+              <li{% if name == "/contact" %} class="active"{% endif %}><a href="/contact">Contact</a></li>
+              <!--<li{% if title == "Uploads" %} class="active"{% endif %}><a href="/uploads">Uploads</a></li>-->
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="container">
+      {% block content %}
+      {% endblock %}
+
+    <hr>
+
+    <footer>
+        <h6>Logged in as {{user}} <a href={{logout}}>[Logout]</a></h6>
+        <p>&copy; conor10 2012</p>
+    </footer>
+
+    </div>
+  </body>
+</html>
