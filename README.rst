@@ -14,7 +14,7 @@ http://gcanalyser.appspot.com/
 Supported JVMs
 ==============
 
-At present only tested on Oracle Java 6 GC logs with the following garbage collectors:
+At present only tested on Oracle Java 6 JVM GC logs with the following garbage collectors:
 
   * Young Copy and Old MarkSweepCompact
   * Young PS Scavenge Old PS MarkSweep
@@ -29,4 +29,4 @@ BSD
 
 Screen captures
 ===============
-.. image:: screencapture.png
+.. image:: gc-analyser/blob/master/screencapture.png

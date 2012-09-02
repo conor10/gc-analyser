@@ -35,8 +35,8 @@ class MainPage(webapp2.RequestHandler):
         user = users.get_current_user()
 
         # We use app.yaml to configure overall authentication
-        """if not validate_user(user.email()):
-            self.redirect(users.create_login_url(self.request.uri))"""
+        if not validate_user(user.email()):
+            self.redirect(users.create_login_url(self.request.uri))
 
         path = self.request.path
         temp = 'static/templates' + path + '.html'
@@ -62,8 +62,8 @@ class ContactHandler(webapp2.RequestHandler):
         user = users.get_current_user()
 
         # We use app.yaml to configure overall authentication
-        """if not validate_user(user.email()):
-            self.redirect(users.create_login_url(self.request.uri))"""
+        if not validate_user(user.email()):
+            self.redirect(users.create_login_url(self.request.uri))
 
         template_values = { 
             'user': user,
@@ -90,8 +90,8 @@ class AnalyseLog(webapp2.RequestHandler):
         user = users.get_current_user()
 
         # We use app.yaml to configure overall authentication
-        """if not validate_user(user.email()):
-            self.redirect(users.create_login_url(self.request.uri))"""
+        if not validate_user(user.email()):
+            self.redirect(users.create_login_url(self.request.uri))
 
         start = time.time()
 
@@ -191,25 +191,6 @@ class ServeHandler(blobstore_handlers.BlobstoreDownloadHandler):
         self.send_blob(blob_info)
 
 
-class GraphHandler():
-    """Not used yet will provide retrival facilities for 
-    graphs previously created
-    """
-    def get(self, parent_key, graph_type):
-
-        q = db.GqlQuery("SELECT blob_key FROM GraphModel " +
-                    "WHERE parent_key = :1 AND graph_type = :2 " +
-                    parent_key, graph_type)
-
-        results = q.get()
-
-        if not results:
-            # Generate results
-            data_query = db.GqlQuery("SELECT * FROM GCModel " +
-                "WHERE parent_key = :1", parent_key)
-            results = data_query.get()
-
-
 def validate_user(user):
     """Temporary function to restrict access to certain domain/users"""
     valid_users = ['conor10@gmail.com']
@@ -233,7 +214,6 @@ def validate_user(user):
 app = webapp2.WSGIApplication([('/', MainPage),
                                ('/analyse', AnalyseLog),
                                ('/serve/([^/]+)?', ServeHandler),
-                               ('/graph/[0-9]+', GraphHandler),
                                ('/submit-contact', ContactHandler),
                                ('/.*', MainPage)],
                               debug=True)
