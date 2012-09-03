@@ -64,12 +64,12 @@ class SummaryStats(object):
         events = len(gc_data)
         self.stats['Total Events'] = events
 
-        self.stats['Elapsed Time'] = "%.3f " % \
+        self.stats['Elapsed Time'] = '%.3f ' % \
             (gc_data[-1].timestamp - gc_data[0].timestamp) + ' secs'
 
-        self.stats['Time spent in Full GC'] = "%.3f " % \
+        self.stats['Time spent in Full GC'] = '%.3f ' % \
             (self.full_duration.total) + ' secs'
-        self.stats['Time spent in YG GC'] = "%.3f " % \
+        self.stats['Time spent in YG GC'] = '%.3f ' % \
             (self.yg_duration.total) + ' secs'
 
         self.stats['Heap Start / End (Peak)'] = \
