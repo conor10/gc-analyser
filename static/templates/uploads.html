@@ -1,0 +1,20 @@
+{% extends "static/templates/base.html" %}
+      {% block title %}Uploads{% endblock %}
+      {% block content %}
+      <h3>My log file uploads</h3>
+
+      <table class="table table-hover" style="font-size: 8pt">
+        <tr>
+          <th>Timestamp</th>
+          <th>Notes</th>
+          <th>Filename</th>
+        </tr>
+        {% for entry in uploads %}
+          <tr>
+            <td>{{entry.timestamp}}</td>
+            <td>{{entry.notes}}</td>
+            <td><a href="/prev?key={{entry.key()}}">{{entry.filename}}</a> [ <a href="/del?key={{entry.key()}}">del</a> ]</td>
+          </tr>
+        {% endfor %}
+      </table>
+{% endblock %}

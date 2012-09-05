@@ -1,5 +1,7 @@
 import unittest
 
+import parsegc
+
 from parsegc import ParseGCLog, YoungGenGCEntry, FullGCEntry
 # TODO
 # 1. Mangled old MSC entries (see TODOs below)
@@ -81,7 +83,7 @@ class ParseGCTest(unittest.TestCase):
         -XX:+UseSerialGC
         """
         result = self.parser.parse(SERIAL_ENTRY1)
-        expected = YoungGenGCEntry(
+        expected = parsegc.generate_yg_gc_entry(
             "47.100",
             "47.100",
             "DefNew",
@@ -99,7 +101,7 @@ class ParseGCTest(unittest.TestCase):
         self.assertEqual(result, expected)
 
         yg_result2 = self.parser.parse(SERIAL_YG1)
-        yg_expected2 = YoungGenGCEntry(
+        yg_expected2 = parsegc.generate_yg_gc_entry(
             "1.321",
             "1.321",
             "DefNew",
@@ -119,7 +121,7 @@ class ParseGCTest(unittest.TestCase):
         # TODO SERIAL_YG2 entry
 
         full_result = self.parser.parse(SERIAL_FULL)
-        full_expected = FullGCEntry(
+        full_expected = parsegc.generate_full_gc_entry(
             "26.256",
             "26.256",
             "Tenured",
@@ -140,7 +142,7 @@ class ParseGCTest(unittest.TestCase):
         self.assertEqual(full_result, full_expected)
 
         system_result = self.parser.parse(SERIAL_SYSTEM)
-        system_expected = FullGCEntry(
+        system_expected = parsegc.generate_full_gc_entry(
             "11.576",
             "11.576",
             "Tenured",
@@ -168,7 +170,7 @@ class ParseGCTest(unittest.TestCase):
         -XX:+UseParallelGC, auto-enabled with -XX:+UseParallelOldGC
         """
         result = self.parser.parse(PARALLEL_ENTRY1)
-        expected = YoungGenGCEntry(
+        expected = parsegc.generate_yg_gc_entry(
             "2.590",
             None,
             "PSYoungGen",
@@ -192,7 +194,7 @@ class ParseGCTest(unittest.TestCase):
         -XX:+UseParNewGC
         """
         yg_result = self.parser.parse(PARNEW_MSC_YG2)
-        yg_expected = YoungGenGCEntry(
+        yg_expected = parsegc.generate_yg_gc_entry(
             "1.025",
             "1.025",
             "ParNew",
@@ -210,7 +212,7 @@ class ParseGCTest(unittest.TestCase):
         self.assertEqual(yg_result, yg_expected)
 
         full_result = self.parser.parse(PARNEW_MSC_FULL)
-        full_expected = FullGCEntry(
+        full_expected = parsegc.generate_full_gc_entry(
            "32.438",
            "32.438",
            "Tenured",
@@ -231,7 +233,7 @@ class ParseGCTest(unittest.TestCase):
         self.assertEqual(full_result, full_expected)
 
         system_result = self.parser.parse(PARNEW_MSC_SYSTEM)
-        system_expected = FullGCEntry(
+        system_expected = parsegc.generate_full_gc_entry(
             "11.033",
             "11.033",
             "Tenured",
@@ -260,7 +262,7 @@ class ParseGCTest(unittest.TestCase):
         -XX:+UseParNewGC, auto-enabled with -XX:+UseConcMarkSweepGC 
         """
         result = self.parser.parse(PAR_NEW_ENTRY1)
-        expected = YoungGenGCEntry(
+        expected = parsegc.generate_yg_gc_entry(
             "29.063",
             "29.063",
             "ParNew",
@@ -278,7 +280,7 @@ class ParseGCTest(unittest.TestCase):
         self.assertEqual(result, expected)
 
         yg_result = self.parser.parse(PARNEW_CMS_YG1)
-        yg_expected = YoungGenGCEntry(
+        yg_expected = parsegc.generate_yg_gc_entry(
             "2.225",
             "2.225",
             "ParNew",
@@ -296,7 +298,7 @@ class ParseGCTest(unittest.TestCase):
         self.assertEqual(yg_result, yg_expected)
 
         full_result = self.parser.parse(PARNEW_CMS_FULL)
-        full_expected = FullGCEntry(
+        full_expected = parsegc.generate_full_gc_entry(
             "12.850",
             "12.850",
             "CMS",
@@ -317,7 +319,7 @@ class ParseGCTest(unittest.TestCase):
         self.assertEqual(full_result, full_expected)
         
         system_result = self.parser.parse(PARNEW_CMS_SYSTEM)
-        system_expected = FullGCEntry(
+        system_expected = parsegc.generate_full_gc_entry(
             "10.160",
             "10.479",
             "CMS",
@@ -345,7 +347,7 @@ class ParseGCTest(unittest.TestCase):
         -XX:+UseConcMarkSweepGC -XX:-UseParNewGC
         """
         yg_result = self.parser.parse(COPY_CMS_YG1)
-        yg_expected = YoungGenGCEntry(
+        yg_expected = parsegc.generate_yg_gc_entry(
             "1.438",
             "1.438",
             "DefNew",
@@ -363,7 +365,7 @@ class ParseGCTest(unittest.TestCase):
         self.assertEqual(yg_result, yg_expected)
 
         full_result = self.parser.parse(COPY_CMS_FULL)
-        full_expected = FullGCEntry(
+        full_expected = parsegc.generate_full_gc_entry(
             "6.497",
             "6.497",
             "CMS",
@@ -384,7 +386,7 @@ class ParseGCTest(unittest.TestCase):
         self.assertEqual(full_result, full_expected)
 
         system_result = self.parser.parse(COPY_CMS_SYSTEM)
-        system_expected = FullGCEntry(
+        system_expected = parsegc.generate_full_gc_entry(
             "10.377",
             "10.377",
             "CMS",
@@ -412,7 +414,7 @@ class ParseGCTest(unittest.TestCase):
         -XX:+UseParallelGC -XX:+UseParallelOldGC, turn adaptive sizeing on/off with -XX:+UseAdaptiveSizePolicy
         """
         yg_result = self.parser.parse(PARALLEL_MARKSWEEP_ADAPTIVE_YG1)
-        yg_expected = YoungGenGCEntry(
+        yg_expected = parsegc.generate_yg_gc_entry(
             "4.607",
             None,
             "PSYoungGen",
@@ -430,7 +432,7 @@ class ParseGCTest(unittest.TestCase):
         self.assertEqual(yg_result, yg_expected)
 
         yg_result2 = self.parser.parse(PARALLEL_MARKSWEEP_NON_ADAPTIVE_YG1)
-        yg_expected2 = YoungGenGCEntry(
+        yg_expected2 = parsegc.generate_yg_gc_entry(
             "0.285",
             None,
             "PSYoungGen",
@@ -448,7 +450,7 @@ class ParseGCTest(unittest.TestCase):
         self.assertEqual(yg_result2, yg_expected2)
 
         full_result = self.parser.parse(PARALLEL_MARKSWEEP_ADAPTIVE_FULL)
-        full_expected = FullGCEntry(
+        full_expected = parsegc.generate_full_gc_entry(
             "5.257",
             None,
             "ParOldGen",
@@ -470,7 +472,7 @@ class ParseGCTest(unittest.TestCase):
         self.assertEqual(full_result, full_expected)
 
         full_result2 = self.parser.parse(PARALLEL_MARKSWEEP_NON_ADAPTIVE_FULL)
-        full_expected2 = FullGCEntry(
+        full_expected2 = parsegc.generate_full_gc_entry(
             "0.322",
             None,
             "ParOldGen",
@@ -492,7 +494,7 @@ class ParseGCTest(unittest.TestCase):
         self.assertEqual(full_result2, full_expected2)
 
         system_result = self.parser.parse(PARALLEL_MARKSWEEP_ADAPTIVE_SYSTEM)
-        system_expected = FullGCEntry(
+        system_expected = parsegc.generate_full_gc_entry(
             "10.295",
             None,
             "ParOldGen",
@@ -515,7 +517,7 @@ class ParseGCTest(unittest.TestCase):
         self.assertEqual(system_result, system_expected)
 
         system_result2 = self.parser.parse(PARALLEL_MARKSWEEP_NON_ADAPTIVE_SYSTEM)
-        system_expected2 = FullGCEntry(
+        system_expected2 = parsegc.generate_full_gc_entry(
             "10.207",
             None,
             "ParOldGen",

@@ -111,7 +111,7 @@ class AnalyseLog(webapp2.RequestHandler):
             summary_stats = SummaryStats(gc_results).stats
 
             # persist gc data - too slow at present with large datasets
-            #gc_datastore.store_data(log_key, gc_results)
+            gc_datastore.store_data(log_key, gc_results)
 
             # persist all CSV data we generate to the store so we 
             # won't have to regenerate later
@@ -154,7 +154,7 @@ class AnalyseLog(webapp2.RequestHandler):
                 'user': user,
                 'logout': users.create_logout_url("/"),
                 'duration': duration,
-                'submission_key': str(log_key),
+                'name': '/uploads',
                 'results_key': str(results_csv_key),
                 'summary_stats': summary_stats,
                 'gc_results': gc_results,
@@ -180,6 +180,33 @@ class AnalyseLog(webapp2.RequestHandler):
         self.response.out.write(template.render(template_values))
 
 
+class ViewUploads(webapp2.RequestHandler):
+    """Serves up details of all previous uploads by user"""
+    def get(self):
+        user = users.get_current_user()
+
+        # We use app.yaml to configure overall authentication
+        if not validate_user(user.email()):
+            self.redirect(users.create_login_url(self.request.uri))
+
+        q = db.GqlQuery("SELECT * FROM LogData " + 
+            "WHERE user = :1", user)
+
+        uploads = q.fetch(None)
+
+        template_values = {
+            'user': user,
+            'logout': users.create_logout_url("/"),
+            'name': '/uploads',
+            'uploads': uploads
+            }
+
+        template = jinja_environment.get_template(
+                'static/templates/uploads.html')
+
+        self.response.out.write(template.render(template_values))
+
+
 class ServeHandler(blobstore_handlers.BlobstoreDownloadHandler):
     """Serves up blob requests from store
 
@@ -189,6 +216,92 @@ class ServeHandler(blobstore_handlers.BlobstoreDownloadHandler):
         resource = str(urllib.unquote(resource))
         blob_info = blobstore.BlobInfo.get(resource)
         self.send_blob(blob_info)
+
+
+class GetUploadHandler(webapp2.RequestHandler):
+    """Serves up previous upload by a user"""
+
+    def get(self):
+
+        user = users.get_current_user()
+
+        # We use app.yaml to configure overall authentication
+        if not validate_user(user.email()):
+            self.redirect(users.create_login_url(self.request.uri))
+
+        start = time.time()
+
+        key = self.request.get("key")
+
+        gc_data = gc_datastore.get_data(key)
+        #need to sort results
+
+        # We regenerate summary stats with each invocation
+        summary_stats = SummaryStats(gc_data).stats
+
+        q = db.GqlQuery("SELECT * FROM GraphModel " +
+                "WHERE ANCESTOR IS :1 ", key)
+
+        results = q.fetch(6)
+
+        for entry in results:
+            if entry.graph_type == graph.RAW_CSV_DATA:
+                results_csv_key = str(entry.blob_key.key())
+            elif entry.graph_type == graph.YG_GC_MEMORY:
+                yg_memory_key = str(entry.blob_key.key())
+            elif entry.graph_type == graph.GC_DURATION:
+                gc_duration_key = str(entry.blob_key.key())
+            elif entry.graph_type == graph.MEMORY_RECLAIMED:
+                gc_reclaimed_key = str(entry.blob_key.key())
+            elif entry.graph_type == graph.FULL_GC_MEMORY:
+                full_memory_key = str(entry.blob_key.key())
+            elif entry.graph_type == graph.MEMORY_UTIL_POST:
+                memory_util_post_key = str(entry.blob_key.key())
+
+        duration = time.time() - start
+
+        # Pass the key to our results, as the data will be obtained via a 
+        template_values = {
+            'user': user,
+            'logout': users.create_logout_url("/"),
+            'name': '/uploads',
+            'duration': duration,
+            'results_key': results_csv_key,
+            'summary_stats': summary_stats,
+            'gc_results': gc_data,
+            'yg_memory_key': yg_memory_key,
+            'full_memory_key': full_memory_key,
+            'gc_duration_key': gc_duration_key,
+            'gc_reclaimed_key': gc_reclaimed_key,
+            'memory_util_post_key': memory_util_post_key
+        }
+
+        template = jinja_environment.get_template(
+            'static/templates/results.html')
+        self.response.out.write(template.render(template_values))
+
+
+class DeleteUploadHandler(webapp2.RequestHandler):
+    """Delete uploaded entry"""
+    def get(self):
+        user = users.get_current_user()
+
+        # We use app.yaml to configure overall authentication
+        if not validate_user(user.email()):
+            self.redirect(users.create_login_url(self.request.uri))
+
+        key = self.request.get("key")
+
+        # Ensure user attempting delete is creator of original entry
+        q = db.GqlQuery("SELECT * FROM LogData " + 
+            "WHERE user = :1 " +
+            "AND ANCESTOR is :2", user, key)
+
+        # If result isn't empty perform delete
+        if q.count() == 1:
+            db.delete(key)
+
+        self.redirect("/uploads")
 
 
 def validate_user(user):
@@ -209,11 +322,14 @@ def validate_user(user):
             return True
 
     return False
-     
+
 
 app = webapp2.WSGIApplication([('/', MainPage),
                                ('/analyse', AnalyseLog),
+                               ('/uploads', ViewUploads),
                                ('/serve/([^/]+)?', ServeHandler),
+                               ('/prev.*', GetUploadHandler),
+                               ('/del.*', DeleteUploadHandler),
                                ('/submit-contact', ContactHandler),
                                ('/.*', MainPage)],
                               debug=True)

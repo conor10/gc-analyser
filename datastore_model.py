@@ -32,7 +32,6 @@ class GraphModel(db.Model):
 
     Child entity of LogData
     """
-    #name = db.StringProperty()
     graph_type = db.IntegerProperty()
     blob_key = blobstore.BlobReferenceProperty()
 

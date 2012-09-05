@@ -1,3 +1,7 @@
+# Required for unit testing purposes
+import sys
+sys.path = sys.path + ['/usr/local/google_appengine', '/usr/local/google_appengine/lib/yaml/lib', '/usr/local/google_appengine/google/appengine']
+
 from google.appengine.ext import db
 
 from datastore_model import  FullGCModel, YoungGenGCModel
@@ -7,9 +11,10 @@ from parsegc import FullGCEntry, YoungGenGCEntry
 def get_data(gc_key):
     """Get GC data entries corresponding to key"""
     q = db.GqlQuery("SELECT * FROM GCModel " +
-                "WHERE parent_key = :1 ", gc_key)
+                "WHERE ANCESTOR IS :1 " +
+                "ORDER BY timestamp", gc_key)
 
-    results = q.get()
+    results = q.fetch(None)
 
     if not results:
         raise DataStoreException("Invalid parent_key specified: " + gc_key)
@@ -62,7 +67,7 @@ def _batch_write(dataset, size=1000):
         db.put(dataset)
 
 
-def _create_yg_entry(model):
+def _create_yg_entry(entry):
     """Create YoungGenGCEntry from equivalent model object"""
     return YoungGenGCEntry(
         timestamp=float(entry.timestamp),
@@ -80,7 +85,7 @@ def _create_yg_entry(model):
         sys_time=float(entry.sys_time),
         real_time=float(entry.real_time))
 
-def _create_full_entry(model):
+def _create_full_entry(entry):
     """Create FullGCEntry from equivalent model object"""
     return FullGCEntry(
         timestamp=float(entry.timestamp),

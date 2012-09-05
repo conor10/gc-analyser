@@ -91,7 +91,7 @@ class ParseGCLog(object):
                 #print gc.groups()
 
                 #result = YoungGenGCEntry(ts.group(1), *yg_gc.groups())
-                result = YoungGenGCEntry(ts.group(1),
+                result = generate_yg_gc_entry(ts.group(1),
                     yg_gc.group('gc_ts'),
                     yg_gc.group('collector'),
                     yg_gc.group('yg_pre'),
@@ -110,7 +110,7 @@ class ParseGCLog(object):
 
             full_gc = full_gc_entry.match(entry)
             if full_gc:
-                result = FullGCEntry(ts.group(1),
+                result = generate_full_gc_entry(ts.group(1),
                     full_gc.group('gc_ts'),
                     full_gc.group('collector'),
                     full_gc.group('tenured_pre'),
@@ -147,13 +147,92 @@ class ParseGCLog(object):
             return None
 
 
+# TODO: Check JVM source to confirm 1024 not 1000 should be used
+def to_bytes(value):
+    """Convert value in kb to bytes"""
+    return value << 10
+
+
+def generate_yg_gc_entry(
+                timestamp,
+                gc_timestamp,
+                collector,
+                yg_util_pre,
+                yg_util_post,
+                yg_size_post,
+                yg_pause_time,
+                heap_util_pre, 
+                heap_util_post, 
+                heap_size_post, 
+                pause_time,
+                user_time,
+                sys_time,
+                real_time):
+    """Generate YoungGenGCEntry from string attribute values"""
+    return YoungGenGCEntry(
+        float(timestamp),
+        float(gc_timestamp or "0"),
+        collector,
+        to_bytes(int(yg_util_pre)),
+        to_bytes(int(yg_util_post)),
+        to_bytes(int(yg_size_post)),
+        float(yg_pause_time or "0"),
+        to_bytes(int(heap_util_pre)),
+        to_bytes(int(heap_util_post)),
+        to_bytes(int(heap_size_post)),
+        float(pause_time),
+        float(user_time),
+        float(sys_time),
+        float(real_time))
+
+def generate_full_gc_entry(
+                timestamp,
+                gc_timestamp,
+                collector,
+                tenured_util_pre,
+                tenured_util_post,
+                tenured_size_post,
+                tenured_pause_time,
+                heap_util_pre, 
+                heap_util_post, 
+                heap_size_post,
+                perm_util_pre,
+                perm_util_post,
+                perm_size_post,
+                pause_time, 
+                user_time,
+                sys_time,
+                real_time,
+                system=None):
+    """Generate YoungGenGCEntry from string attribute values"""
+    return FullGCEntry(
+        float(timestamp),
+        float(gc_timestamp or "0"),
+        collector,
+        to_bytes(int(tenured_util_pre)),
+        to_bytes(int(tenured_util_post)),
+        to_bytes(int(tenured_size_post)),
+        float(tenured_pause_time or 0),
+        to_bytes(int(heap_util_pre)),
+        to_bytes(int(heap_util_post)),
+        to_bytes(int(heap_size_post)),
+        to_bytes(int(perm_util_pre)),
+        to_bytes(int(perm_util_post)),
+        to_bytes(int(perm_size_post)),
+        float(pause_time),
+        float(user_time),
+        float(sys_time),
+        float(real_time),
+        system or False)
+
+
 class GCEntry(object):
 
     def __init__(self,
                 collector,
                 timestamp):
         self.collector = collector
-        self.timestamp = float(timestamp)
+        self.timestamp = timestamp
 
     def __eq__(self, 
                 other):
@@ -179,12 +258,7 @@ class GCEntry(object):
                 dict[key] = self.__dict__[key]
         return dict
 
-    # TODO: Check JVM source to confirm 1024 not 1000 should be used
-    def to_bytes(self, value):
-        return value << 10
-
 class YoungGenGCEntry(GCEntry):
-
     def __init__(self, 
                 timestamp,
                 gc_timestamp,
@@ -201,18 +275,18 @@ class YoungGenGCEntry(GCEntry):
                 sys_time,
                 real_time):
         super(YoungGenGCEntry, self).__init__(collector, timestamp)
-        self.gc_timestamp = float(gc_timestamp or "0")
-        self.yg_util_pre = self.to_bytes(int(yg_util_pre))
-        self.yg_util_post = self.to_bytes(int(yg_util_post))
-        self.yg_size_post = self.to_bytes(int(yg_size_post))
-        self.yg_pause_time = float(yg_pause_time or "0")
-        self.heap_util_pre = self.to_bytes(int(heap_util_pre))
-        self.heap_util_post = self.to_bytes(int(heap_util_post))
-        self.heap_size_post = self.to_bytes(int(heap_size_post))
-        self.pause_time = float(pause_time)
-        self.user_time = float(user_time)
-        self.sys_time = float(sys_time)
-        self.real_time = float(real_time)
+        self.gc_timestamp = gc_timestamp
+        self.yg_util_pre = yg_util_pre
+        self.yg_util_post = yg_util_post
+        self.yg_size_post = yg_size_post
+        self.yg_pause_time = yg_pause_time
+        self.heap_util_pre = heap_util_pre
+        self.heap_util_post = heap_util_post
+        self.heap_size_post = heap_size_post
+        self.pause_time = pause_time
+        self.user_time = user_time
+        self.sys_time = sys_time
+        self.real_time = real_time
 
 
 class FullGCEntry(GCEntry):
@@ -234,25 +308,22 @@ class FullGCEntry(GCEntry):
                 user_time,
                 sys_time,
                 real_time,
-                system=None):
+                system):
         super(FullGCEntry, self).__init__(collector, timestamp)
-        self.gc_timestamp = float(gc_timestamp or 0)
-        self.tenured_util_pre = self.to_bytes(int(tenured_util_pre))
-        self.tenured_util_post = self.to_bytes(int(tenured_util_post))
-        self.tenured_size_post = self.to_bytes(int(tenured_size_post))
-        self.tenured_pause_time = float(tenured_pause_time or 0)
-        self.heap_util_pre = self.to_bytes(int(heap_util_pre))
-        self.heap_util_post = self.to_bytes(int(heap_util_post))
-        self.heap_size_post = self.to_bytes(int(heap_size_post))
-        self.perm_util_pre = self.to_bytes(int(perm_util_pre))
-        self.perm_util_post = self.to_bytes(int(perm_util_post))
-        self.perm_size_post = self.to_bytes(int(perm_size_post))
-        self.pause_time = float(pause_time)
-        self.user_time = float(user_time)
-        self.sys_time = float(sys_time)
-        self.real_time = float(real_time)
-        if system:
-            self.system = True
-        else:
-            self.system = system
+        self.gc_timestamp = gc_timestamp
+        self.tenured_util_pre = tenured_util_pre
+        self.tenured_util_post = tenured_util_post
+        self.tenured_size_post = tenured_size_post
+        self.tenured_pause_time = tenured_pause_time
+        self.heap_util_pre = heap_util_pre
+        self.heap_util_post = heap_util_post
+        self.heap_size_post = heap_size_post
+        self.perm_util_pre = perm_util_pre
+        self.perm_util_post = perm_util_post
+        self.perm_size_post = perm_size_post
+        self.pause_time = pause_time
+        self.user_time = user_time
+        self.sys_time = sys_time
+        self.real_time = real_time
+        self.system = system
 

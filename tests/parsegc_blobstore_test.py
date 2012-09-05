@@ -4,7 +4,9 @@ import shutil
 import sys
 import unittest
 
+import gc_datastore
 import graph
+import parsegc
 
 # Required for unit testing purposes
 sys.path = sys.path + ['/usr/local/google_appengine', '/usr/local/google_appengine/lib/yaml/lib', '/usr/local/google_appengine/google/appengine']
@@ -17,7 +19,7 @@ from google.appengine.ext import testbed
 
 from csvwriter import BlobResultWriter
 from datastore_model import LogData
-from parsegc import ParseGCLog
+from parsegc import ParseGCLog, FullGCEntry, YoungGenGCEntry
 
 
 class TestbedWithFiles(testbed.Testbed):
@@ -83,7 +85,7 @@ class ParseGCBlobTest(unittest.TestCase):
             gc_data, 
             self.csv_writer)
         result_data = self._load_blob_data(blob_key)
-        self.assertTrue(result_data, expected_data)
+        self.assertEqual(result_data, expected_data)
 
     def test_generate_gc_reclaimed_csv(self):
         expected_data = self._load_file_data(self.path + "expected_reclaimed.csv")
@@ -96,7 +98,7 @@ class ParseGCBlobTest(unittest.TestCase):
             gc_data, 
             self.csv_writer)
         result_data = self._load_blob_data(blob_key)
-        self.assertTrue(result_data, expected_data)
+        self.assertEqual(result_data, expected_data)
 
     def test_generate_gc_duration_csv(self):
         expected_data = self._load_file_data(self.path + "expected_duration.csv")
@@ -109,4 +111,63 @@ class ParseGCBlobTest(unittest.TestCase):
             gc_data, 
             self.csv_writer)
         result_data = self._load_blob_data(blob_key)
-        self.assertTrue(result_data, expected_data)
+        self.assertEqual(result_data, expected_data)
+
+    def test_gc_datastore(self):
+        """Test storage & retrival of GC entries in datastore"""
+        yg_gc = parsegc.generate_yg_gc_entry(
+            "100.25",
+            "100.25",
+            "ParNew",
+            "3",
+            "2",
+            "8",
+            "0.12345",
+            "8192",
+            "5120",
+            "16384",
+            "3.12345",
+            "1.5",
+            "2.0",
+            "3.1")
+
+        full_gc = parsegc.generate_full_gc_entry(
+            "200.5",
+            "200.5",
+            "Tenured",
+            "20",
+            "10",
+            "40",
+            "0.23456",
+            "8192",
+            "5120",
+            "16384",
+            "200",
+            "100",
+            "400",
+            "3.1234",
+            "1.9",
+            "0.05",
+            "3.11")
+
+        # Items should be written to & returned from the store
+        # ordered by timestamp
+        gc_data = [yg_gc, full_gc]
+
+        log_key = LogData(
+            filename="test_gc_datastore.tmp",
+            notes="notes").put()
+
+        gc_datastore.store_data(log_key, gc_data)
+
+        results = gc_datastore.get_data(log_key)
+
+        self.assertEqual(results, gc_data)
+        
+        # Uncomment below to help debug failures
+        """
+        for i, entry in enumerate(gc_data):
+            
+            print "Expected: " + str(entry.__dict__)
+            print "Actual:   " + str(results[i].__dict__)"""
+        

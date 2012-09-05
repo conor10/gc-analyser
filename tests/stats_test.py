@@ -1,5 +1,6 @@
 import unittest
 
+import parsegc
 import stats
 
 from parsegc import FullGCEntry, YoungGenGCEntry
@@ -15,12 +16,12 @@ class StatsTest(unittest.TestCase):
             stats.process(entry)
 
         self.assertEqual(stats.count, len(values))
-        self.assertEquals(stats.min, 1)
-        self.assertEquals(stats.max, 99)
-        self.assertEquals(stats.first, 10)
-        self.assertEquals(stats.last, 5)
-        self.assertEquals(stats.total, 124)
-        self.assertEquals(stats.average, sum(values) / len(values))
+        self.assertEqual(stats.min, 1)
+        self.assertEqual(stats.max, 99)
+        self.assertEqual(stats.first, 10)
+        self.assertEqual(stats.last, 5)
+        self.assertEqual(stats.total, 124)
+        self.assertEqual(stats.average, sum(values) / len(values))
 
     def test_intstats2(self):
         values = [-10, -99, 1, 2, 3, 4, 0, 5]
@@ -31,13 +32,13 @@ class StatsTest(unittest.TestCase):
             stats.process(entry)
 
         self.assertEqual(stats.count, len(values))
-        self.assertEquals(stats.min, -99)
-        self.assertEquals(stats.max, 5)
-        self.assertEquals(stats.first, -10)
-        self.assertEquals(stats.last, 5)
-        self.assertEquals(stats.total, -94)
+        self.assertEqual(stats.min, -99)
+        self.assertEqual(stats.max, 5)
+        self.assertEqual(stats.first, -10)
+        self.assertEqual(stats.last, 5)
+        self.assertEqual(stats.total, -94)
         # You loose precision calculating moving average with integer values
-        self.assertEquals(stats.average, -14)
+        self.assertEqual(stats.average, -14)
 
     def test_floatstats(self):
         values = [10.0, 99.0, 1.0, 2.0, 3.0, 4.0, 5.0]
@@ -48,12 +49,12 @@ class StatsTest(unittest.TestCase):
             stats.process(entry)
 
         self.assertEqual(stats.count, len(values))
-        self.assertEquals(stats.min, 1.0)
-        self.assertEquals(stats.max, 99.0)
-        self.assertEquals(stats.first, 10.0)
-        self.assertEquals(stats.last, 5.0)
-        self.assertEquals(stats.total, 124.0)
-        self.assertEquals(stats.average, sum(values) / len(values))
+        self.assertEqual(stats.min, 1.0)
+        self.assertEqual(stats.max, 99.0)
+        self.assertEqual(stats.first, 10.0)
+        self.assertEqual(stats.last, 5.0)
+        self.assertEqual(stats.total, 124.0)
+        self.assertEqual(stats.average, sum(values) / len(values))
 
     def test_floatstats2(self):
         values = [-10.0, -99.0, 1.0, 2.0, 3.0, 4.0, 0.0, 5.0]
@@ -63,38 +64,38 @@ class StatsTest(unittest.TestCase):
         for entry in values:
             stats.process(entry)
 
-        self.assertEquals(stats.count, len(values))
-        self.assertEquals(stats.min, -99.0)
-        self.assertEquals(stats.max, 5.0)
-        self.assertEquals(stats.first, -10.0)
-        self.assertEquals(stats.last, 5.0)
-        self.assertEquals(stats.total, -94.0)
-        self.assertEquals(stats.average, sum(values) / len(values))
+        self.assertEqual(stats.count, len(values))
+        self.assertEqual(stats.min, -99.0)
+        self.assertEqual(stats.max, 5.0)
+        self.assertEqual(stats.first, -10.0)
+        self.assertEqual(stats.last, 5.0)
+        self.assertEqual(stats.total, -94.0)
+        self.assertEqual(stats.average, sum(values) / len(values))
 
     def test_int_bytes_human_readable(self):
-        self.assertEquals(stats.int_bytes_human_readable(0),  "0 B")
-        self.assertEquals(stats.int_bytes_human_readable(1),  "1 B")
-        self.assertEquals(stats.int_bytes_human_readable(1 << 10),  "1 KB")
-        self.assertEquals(stats.int_bytes_human_readable(1 << 20),  "1 MB")
-        self.assertEquals(stats.int_bytes_human_readable(1 << 30),  "1 GB")
-        self.assertEquals(stats.int_bytes_human_readable(1 << 40),  "1 TB")
-        self.assertEquals(stats.int_bytes_human_readable(1 << 50),  "1024 TB")
-        self.assertEquals(stats.int_bytes_human_readable(1 << 64),  "16777216 TB")
+        self.assertEqual(stats.int_bytes_human_readable(0),  "0 B")
+        self.assertEqual(stats.int_bytes_human_readable(1),  "1 B")
+        self.assertEqual(stats.int_bytes_human_readable(1 << 10),  "1 KB")
+        self.assertEqual(stats.int_bytes_human_readable(1 << 20),  "1 MB")
+        self.assertEqual(stats.int_bytes_human_readable(1 << 30),  "1 GB")
+        self.assertEqual(stats.int_bytes_human_readable(1 << 40),  "1 TB")
+        self.assertEqual(stats.int_bytes_human_readable(1 << 50),  "1024 TB")
+        self.assertEqual(stats.int_bytes_human_readable(1 << 64),  "16777216 TB")
 
     def test_float_bytes_human_readable(self):
-        self.assertEquals(stats.float_bytes_human_readable(0),  "0.00 B")
-        self.assertEquals(stats.float_bytes_human_readable(1),  "1.00 B")
-        self.assertEquals(stats.float_bytes_human_readable(1 << 10),  "1.00 KB")
-        self.assertEquals(stats.float_bytes_human_readable(1 << 20),  "1.00 MB")
-        self.assertEquals(stats.float_bytes_human_readable(1 << 30),  "1.00 GB")
-        self.assertEquals(stats.float_bytes_human_readable(1 << 40),  "1.00 TB")
-        self.assertEquals(stats.float_bytes_human_readable(1 << 50),  "1024.00 TB")
-        self.assertEquals(stats.float_bytes_human_readable(1 << 64),  "16777216.00 TB")
+        self.assertEqual(stats.float_bytes_human_readable(0),  "0.00 B")
+        self.assertEqual(stats.float_bytes_human_readable(1),  "1.00 B")
+        self.assertEqual(stats.float_bytes_human_readable(1 << 10),  "1.00 KB")
+        self.assertEqual(stats.float_bytes_human_readable(1 << 20),  "1.00 MB")
+        self.assertEqual(stats.float_bytes_human_readable(1 << 30),  "1.00 GB")
+        self.assertEqual(stats.float_bytes_human_readable(1 << 40),  "1.00 TB")
+        self.assertEqual(stats.float_bytes_human_readable(1 << 50),  "1024.00 TB")
+        self.assertEqual(stats.float_bytes_human_readable(1 << 64),  "16777216.00 TB")
 
     def test_generate_stats(self):
         """Test the generation of stats result set"""
 
-        yg_gc1 = YoungGenGCEntry(
+        yg_gc1 = parsegc.generate_yg_gc_entry(
             "50.0",
             "50.0",
             "ParNew",
@@ -110,7 +111,7 @@ class StatsTest(unittest.TestCase):
             "1.50",
             "2.1")
 
-        yg_gc2 = YoungGenGCEntry(
+        yg_gc2 = parsegc.generate_yg_gc_entry(
             "100.25",
             "100.25",
             "ParNew",
@@ -126,7 +127,7 @@ class StatsTest(unittest.TestCase):
             "2.0",
             "3.1")
 
-        full_gc = FullGCEntry(
+        full_gc = parsegc.generate_full_gc_entry(
             "200.5",
             "200.5",
             "Tenured",
@@ -145,7 +146,7 @@ class StatsTest(unittest.TestCase):
             "0.05",
             "3.11")
 
-        system_gc = FullGCEntry(
+        system_gc = parsegc.generate_full_gc_entry(
             "250.75",
             "250.75",
             "Tenured",
@@ -184,4 +185,4 @@ class StatsTest(unittest.TestCase):
         expected['Avg YG Reclaimed'] = '1 KB'
         expected['Avg Tenured Reclaimed'] = '10 KB'
 
-        self.assertEquals(results, expected)
+        self.assertEqual(results, expected)
