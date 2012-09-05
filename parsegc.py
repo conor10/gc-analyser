@@ -203,7 +203,7 @@ def generate_full_gc_entry(
                 user_time,
                 sys_time,
                 real_time,
-                system=None):
+                system=False):
     """Generate YoungGenGCEntry from string attribute values"""
     return FullGCEntry(
         float(timestamp),
@@ -223,7 +223,7 @@ def generate_full_gc_entry(
         float(user_time),
         float(sys_time),
         float(real_time),
-        system or False)
+        True if system else False)
 
 
 class GCEntry(object):
